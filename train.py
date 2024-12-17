@@ -83,7 +83,7 @@ def train(model, dataloader, optimizer, criterion):
 # Main Function
 def main():
     # Initialize components
-    cifar_trainloader, _, visual_loader, tokenizer = load_data()
+    cifar_trainloader, eli5_loader, visual_loader, tokenizer = load_data()
     vision_encoder = VisionEncoder().to(device)
     text_decoder = GPT2LMHeadModel.from_pretrained('gpt2').to(device)
     model = VisionLanguageModel(vision_encoder, text_decoder).to(device)
@@ -100,6 +100,21 @@ def main():
             _ = vision_encoder(images)
             optimizer.step()
 
+    # Step 2: Train text decoder
+    print("Training Vision Encoder on CIFAR-10...")
+    text_decoder.train()
+    
+    for batch in eli5_loader:
+        input_ids = batch.to(device)  # Input IDs from ELI5 dataset
+        labels = input_ids.clone()  # GPT-2 predicts next tokens
+        
+        optimizer.zero_grad()
+        outputs = text_decoder(input_ids=input_ids, labels=labels)
+        loss = outputs.loss
+        loss.backward()
+        optimizer.step()
+    
+    
     # Step 4: Fine-tune VLM on visual instruction tuning dataset
     print("Fine-tuning Vision-Language Model...")
     for epoch in range(NUM_EPOCHS):
