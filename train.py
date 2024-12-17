@@ -9,8 +9,7 @@ import numpy as np
 import os
 from studentID import get_cifar10_loaders, LLaVADataset, ELI5Dataset
 
-# Set device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 # Constants
 NUM_EPOCHS = 1
