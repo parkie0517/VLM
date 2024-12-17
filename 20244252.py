@@ -229,11 +229,10 @@ class VisionLanguageModel(nn.Module):
         super().__init__()
         self.vision_encoder = vision_encoder
         self.text_decoder = text_decoder
-        # self.linear_layer = nn.Linear(HIDDEN_SIZE, text_decoder.config.n_embd)
+        
 
     def forward(self, images, input_ids, attention_mask):
-        vision_features = self.vision_encoder(images)  # [batch, 1, HIDDEN_SIZE]
-        vision_tokens = self.linear_layer(vision_features)  # Map to GPT-2 input size
+        vision_tokens = self.vision_encoder(images)  # [batch, 1, HIDDEN_SIZE]
 
         # Append visual tokens at the start of the input sequence
         input_embeddings = self.text_decoder.transformer.wte(input_ids)
@@ -497,6 +496,10 @@ def main():
     print("Fine-tuning Vision-Language Model...")
 
     model = VisionLanguageModel(vision_encoder, text_decoder).to(device)
+    for param in model.parameters():
+        param.requires_grad = False
+    for param in model.vision_encoder.fc.parameters():
+        param.requires_grad = True
     optimizer_vlm = optim.AdamW(model.parameters(), lr=5e-5)
     scheduler = StepLR(optimizer_vlm, step_size=1, gamma=0.95)
     criterion_vlm = nn.CrossEntropyLoss(ignore_index=-100)
