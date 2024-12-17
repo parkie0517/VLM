@@ -1,7 +1,7 @@
 import json
 
 # Define the path to your JSON file
-file_path = '../instruct_tuning/instruct.json'
+file_path = 'instruct_tuning/instruct.json'
 
 # Open and load the JSON file
 try:
